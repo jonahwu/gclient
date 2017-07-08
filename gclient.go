@@ -148,7 +148,10 @@ func CalDistance(long1 float64, lati1 float64, long2 float64, lati2 float64) flo
 	return d * 1000.
 
 }
-func CalGPSDistance(posx []float64, posy []float64, ts []int) {
+
+//func CalGPSDistance(posx []float64, posy []float64, ts []int) {
+func ClientSimulation(posx []float64, posy []float64, ts []int) {
+
 	tarx := 25.080223
 	tary := 121.697908
 	fmt.Println("---------------------------------")
@@ -209,7 +212,8 @@ func main() {
 		}
 		//		fmt.Println(posx)
 		//		fmt.Println(posy)
-		CalGPSDistance(posx, posy, ts)
+		//CalGPSDistance(posx, posy, ts)
+		ClientSimulation(posx, posy, ts)
 	case "store":
 		fmt.Println("now let's store data")
 		posx, posy, ts := GetTSDBData()
