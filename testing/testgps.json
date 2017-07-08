@@ -1,0 +1,34 @@
+[
+    {
+        "metric": "rrrrealgps",
+        "timestamp": 1435716527,
+        "value": "23.1234",
+        "tags": {
+           "id": "jonah",
+           "loc":"x"
+                   }    },
+    {
+        "metric": "rrrrealgps",
+        "timestamp": 1435716527,
+        "value": "123.2222",
+        "tags": {
+           "id": "jonah",
+           "loc":"y"
+                   }    },
+    {
+        "metric": "rrrrealgps",
+        "timestamp": 1435716627,
+        "value": "23.3333",
+        "tags": {
+           "id": "jonah",
+           "loc":"x"
+                   }    },
+    {
+        "metric": "rrrrealgps",
+        "timestamp": 1435716627,
+        "value": "123.6666",
+        "tags": {
+           "id": "jonah",
+           "loc":"y"
+                   }    }
+]

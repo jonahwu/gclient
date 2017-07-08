@@ -1,0 +1,11 @@
+{
+    "start": 1435716526,
+    "queries": [
+        {
+            "metric": "rrrrealgps",
+            "aggregator": "avg",
+            "tags": {
+                "id": "jonah",
+		"loc":"*"
+                           }        }
+    ]}

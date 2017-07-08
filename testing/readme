@@ -1,0 +1,15 @@
+curl -i -H "Content-Type: application/json; charset=UTF-8" -X POST -d @mysql.json http://172.16.155.181:14242/api/put?details
+
+
+curl -i -H "Content-Type: application/json; charset=UTF-8"  -d @gmysql.json http://172.16.155.181:14242/api/query
+
+
+
+curl -i -H "Content-Type: application/json; charset=UTF-8" -X POST -d @gpsloc.json http://172.16.155.181:14242/api/put?details
+
+curl -i -H "Content-Type: application/json; charset=UTF-8"  -d @ggpsloc.json http://172.16.155.181:14242/api/query
+
+
+curl -i -H "Content-Type: application/json; charset=UTF-8" -X POST -d @realgps.json http://172.16.155.181:14242/api/put?details
+
+curl -i -H "Content-Type: application/json; charset=UTF-8"  -d @grealgps.json http://172.16.155.181:14242/api/query

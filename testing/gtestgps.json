@@ -1,0 +1,11 @@
+{
+    "start": 1435716526,
+    "queries": [
+        {
+            "metric": "testgps",
+            "aggregator": "avg",
+            "tags": {
+                "id": "jjpg0707",
+		"loc":"*"
+                           }        }
+    ]}
