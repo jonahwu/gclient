@@ -6,8 +6,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"flag"
+	"github.com/jonah/gomobilelib"
 	"github.com/tidwall/gjson"
-	"math"
+	//	"math"
 	"os"
 	"os/exec"
 	"sort"
@@ -137,6 +138,7 @@ func GetTSDBData() ([]float64, []float64, []int) {
 	return posx, posy, ts
 }
 
+/*
 func CalDistance(long1 float64, lati1 float64, long2 float64, lati2 float64) float64 {
 	d2r := 0.0174532925199433
 	dlong := (long2 - long1) * d2r
@@ -148,20 +150,27 @@ func CalDistance(long1 float64, lati1 float64, long2 float64, lati2 float64) flo
 	return d * 1000.
 
 }
+*/
 
 //func CalGPSDistance(posx []float64, posy []float64, ts []int) {
-func ClientSimulation(posx []float64, posy []float64, ts []int) {
-
-	tarx := 25.080223
-	tary := 121.697908
+func ClientSimulation(ts []int, posx []float64, posy []float64) {
+	gglib := gomobilelib.NewGLib()
+	gglib.InitState("testid", ts[0], posx[0], posy[0])
 	fmt.Println("---------------------------------")
 	for i := 0; i < len(posx); i++ {
 		gpsx := posx[i]
 		gpsy := posy[i]
 		tss := ts[i]
-		dist := CalDistance(gpsy, gpsx, tary, tarx)
-		fmt.Println(dist, tss, gpsx, gpsy, tarx, tary)
-		time.Sleep(2 * time.Second)
+		//dist, status := gglib.GLibFilter(tss, gpsx, gpsy)
+		//dist, status, vel := gglib.Start(tss, gpsx, gpsy)
+		js := gglib.Start(tss, gpsx, gpsy)
+		dist := gjson.Get(js, "dist").Float()
+		status := gjson.Get(js, "flag").Int()
+		vel := gjson.Get(js, "vel").Int()
+
+		//		dist := CalDistance(gpsy, gpsx, tary, tarx)
+		fmt.Println("-------", dist, tss, gpsx, gpsy, status, vel)
+		time.Sleep(1 * time.Second)
 	}
 }
 
@@ -213,7 +222,7 @@ func main() {
 		//		fmt.Println(posx)
 		//		fmt.Println(posy)
 		//CalGPSDistance(posx, posy, ts)
-		ClientSimulation(posx, posy, ts)
+		ClientSimulation(ts, posx, posy)
 	case "store":
 		fmt.Println("now let's store data")
 		posx, posy, ts := GetTSDBData()
