@@ -6,9 +6,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"flag"
-	"github.com/jonah/gomobilelib"
 	"github.com/tidwall/gjson"
-	//	"math"
+	"math"
 	"os"
 	"os/exec"
 	"sort"
@@ -105,7 +104,7 @@ func CurlCommand(remoteip string, remoteport string, tmpgettsdb string) string {
 	return out.String()
 }
 
-func GetTSDBData() ([]float64, []float64, []int) {
+func GetTSDBData() ([]float64, []float64, []float64, []int) {
 	tmpgettsdb = `{
     "start": 1435716526,
     "queries": [
@@ -113,7 +112,7 @@ func GetTSDBData() ([]float64, []float64, []int) {
             "metric": "testgps",
             "aggregator": "avg",
             "tags": {
-                "id": "*0708*",
+                "id": "*0713*",
                 "loc":"*"
                            }        }
     ]}`
@@ -124,8 +123,10 @@ func GetTSDBData() ([]float64, []float64, []int) {
 	fmt.Println(loc)
 	locx := gjson.Get(loc, "0.dps").String()
 	locy := gjson.Get(loc, "1.dps").String()
+	locv := gjson.Get(loc, "2.dps").String()
 	posx, ts := FromStringToList(locx)
 	posy, ts := FromStringToList(locy)
+	posv, ts := FromStringToList(locv)
 	fmt.Println("result ---------------------")
 	fmt.Println(posx)
 	fmt.Println(posy)
@@ -135,10 +136,9 @@ func GetTSDBData() ([]float64, []float64, []int) {
 	} else {
 		fmt.Println("length of two data is the same")
 	}
-	return posx, posy, ts
+	return posx, posy, posv, ts
 }
 
-/*
 func CalDistance(long1 float64, lati1 float64, long2 float64, lati2 float64) float64 {
 	d2r := 0.0174532925199433
 	dlong := (long2 - long1) * d2r
@@ -150,27 +150,16 @@ func CalDistance(long1 float64, lati1 float64, long2 float64, lati2 float64) flo
 	return d * 1000.
 
 }
-*/
-
-//func CalGPSDistance(posx []float64, posy []float64, ts []int) {
-func ClientSimulation(ts []int, posx []float64, posy []float64) {
-	gglib := gomobilelib.NewGLib()
-	gglib.InitState("testid", ts[0], posx[0], posy[0])
+func CalGPSDistance(posx []float64, posy []float64, ts []int) {
+	tarx := 25.080223
+	tary := 121.697908
 	fmt.Println("---------------------------------")
 	for i := 0; i < len(posx); i++ {
 		gpsx := posx[i]
 		gpsy := posy[i]
 		tss := ts[i]
-		//dist, status := gglib.GLibFilter(tss, gpsx, gpsy)
-		//dist, status, vel := gglib.Start(tss, gpsx, gpsy)
-		js := gglib.Start(tss, gpsx, gpsy)
-		dist := gjson.Get(js, "dist").Float()
-		status := gjson.Get(js, "flag").Int()
-		vel := gjson.Get(js, "vel").Int()
-		beep := gjson.Get(js, "beep").Bool()
-
-		//		dist := CalDistance(gpsy, gpsx, tary, tarx)
-		fmt.Println("-------", dist, beep, status, tss, gpsx, gpsy, vel)
+		dist := CalDistance(gpsy, gpsx, tary, tarx)
+		fmt.Println(dist, tss, gpsx, gpsy, tarx, tary)
 		time.Sleep(2 * time.Second)
 	}
 }
@@ -210,23 +199,23 @@ func main() {
 	flag.Parse()
 	var posx []float64
 	var posy []float64
+	//	var posv []float64
 	var ts []int
 	switch runtype {
 	case "test":
 		fmt.Println("please test something here")
 	case "normal":
 		if datasource == "remote" {
-			posx, posy, ts = GetTSDBData()
+			posx, posy, _, ts = GetTSDBData()
 		} else {
 			posx, posy, ts = GetLocalData(datasource)
 		}
 		//		fmt.Println(posx)
 		//		fmt.Println(posy)
-		//CalGPSDistance(posx, posy, ts)
-		ClientSimulation(ts, posx, posy)
+		CalGPSDistance(posx, posy, ts)
 	case "store":
 		fmt.Println("now let's store data")
-		posx, posy, ts := GetTSDBData()
+		posx, posy, posv, ts := GetTSDBData()
 		file, err := os.Create("text.txt")
 		if err != nil {
 			return
@@ -235,9 +224,10 @@ func main() {
 		for i := 0; i < len(posx); i++ {
 			a := posx[i]
 			b := posy[i]
+			v := posv[i]
 			t := ts[i]
 			//file.WriteString("test\nhello")
-			file.WriteString(fmt.Sprintf("%f   %f   %d \n", a, b, t))
+			file.WriteString(fmt.Sprintf("%f   %f  %d  %d \n", a, b, int(v), t))
 		}
 
 	default:

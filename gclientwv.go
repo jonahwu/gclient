@@ -153,17 +153,18 @@ func CalDistance(long1 float64, lati1 float64, long2 float64, lati2 float64) flo
 */
 
 //func CalGPSDistance(posx []float64, posy []float64, ts []int) {
-func ClientSimulation(ts []int, posx []float64, posy []float64) {
+func ClientSimulation(ts []int, posx []float64, posy []float64, posv []int) {
 	gglib := gomobilelib.NewGLib()
 	gglib.InitState("testid", ts[0], posx[0], posy[0])
 	fmt.Println("---------------------------------")
 	for i := 0; i < len(posx); i++ {
 		gpsx := posx[i]
 		gpsy := posy[i]
+		gpsv := posv[i]
 		tss := ts[i]
 		//dist, status := gglib.GLibFilter(tss, gpsx, gpsy)
 		//dist, status, vel := gglib.Start(tss, gpsx, gpsy)
-		js := gglib.Start(tss, gpsx, gpsy)
+		js := gglib.Start(tss, gpsx, gpsy, gpsv)
 		dist := gjson.Get(js, "dist").Float()
 		status := gjson.Get(js, "flag").Int()
 		vel := gjson.Get(js, "vel").Int()
@@ -175,9 +176,10 @@ func ClientSimulation(ts []int, posx []float64, posy []float64) {
 	}
 }
 
-func GetLocalData(filename string) ([]float64, []float64, []int) {
+func GetLocalData(filename string) ([]float64, []float64, []int, []int) {
 	var posx []float64
 	var posy []float64
+	var posv []int
 	var ltsp []int
 	f, err := os.Open(filename)
 	if err != nil {
@@ -185,18 +187,20 @@ func GetLocalData(filename string) ([]float64, []float64, []int) {
 	}
 	var locx float64
 	var locy float64
+	var locv int
 	var tsp int
 	for {
-		n, err := fmt.Fscanln(f, &locx, &locy, &tsp)
+		n, err := fmt.Fscanln(f, &locx, &locy, &locv, &tsp)
 		if n == 0 || err != nil {
 			break
 		}
 		fmt.Println("lati:", locx, "; long:", locy, "; tsp:", tsp)
 		posx = append(posx, locx)
 		posy = append(posy, locy)
+		posv = append(posv, locv)
 		ltsp = append(ltsp, tsp)
 	}
-	return posx, posy, ltsp
+	return posx, posy, posv, ltsp
 
 }
 
@@ -210,6 +214,7 @@ func main() {
 	flag.Parse()
 	var posx []float64
 	var posy []float64
+	var posv []int
 	var ts []int
 	switch runtype {
 	case "test":
@@ -218,12 +223,12 @@ func main() {
 		if datasource == "remote" {
 			posx, posy, ts = GetTSDBData()
 		} else {
-			posx, posy, ts = GetLocalData(datasource)
+			posx, posy, posv, ts = GetLocalData(datasource)
 		}
 		//		fmt.Println(posx)
 		//		fmt.Println(posy)
 		//CalGPSDistance(posx, posy, ts)
-		ClientSimulation(ts, posx, posy)
+		ClientSimulation(ts, posx, posy, posv)
 	case "store":
 		fmt.Println("now let's store data")
 		posx, posy, ts := GetTSDBData()
